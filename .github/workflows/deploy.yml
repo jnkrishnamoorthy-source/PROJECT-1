@@ -1,28 +1,24 @@
-name: Deploy Website
+name: Deploy
 
 on:
   push:
-    branches:
-      - main
+    branches: [main]
 
 jobs:
-  build-deploy:
+  deploy:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-      - name: Build using Docker
-        run: |
-          docker run --rm -v ${{ github.workspace }}:/app node:18 bash -c "echo Building... && ls"
+      - run: docker build -t site .
 
-      - name: Configure AWS
-        uses: aws-actions/configure-aws-credentials@v2
+      - run: docker run site
+
+      - uses: aws-actions/configure-aws-credentials@v2
         with:
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_KEY }}
           aws-region: us-east-1
 
-      - name: Deploy to S3
-        run: aws s3 sync . s3://your-bucket-name --delete
+      - run: aws s3 sync . s3://krishcloudtech.online --delete
